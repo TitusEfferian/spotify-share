@@ -1,5 +1,6 @@
 // src/lib/imageService.js
 import { codeChallenge, codeVerifier } from '$lib/authHelper';
+import type { CurrentTrack } from './SpotifyTypes';
 
 export async function generateImage() {
 	const authCode = localStorage.getItem('access_token');
@@ -15,8 +16,11 @@ export async function generateImage() {
 		};
 
 		fetch('https://api.spotify.com/v1/me/player/currently-playing', requestOptions)
-			.then((response) => response.text())
-			.then((result) => console.log(result))
+			.then((response) => response.json())
+			.then((result:CurrentTrack) => {
+				const imageUrl = result.item?.album?.images?.[0].url || '';
+				// how to convert this to a base64 image?
+			})
 			.catch((error) => console.error(error));
 	} else {
 		const clientId = '562519f36b3a4666b04648f2dd5b2dd4';

@@ -14,7 +14,7 @@
 			await getToken(code);
 		}
 	});
-    console.log('hello world')
+	console.log(isLoading);
 </script>
 
 <div
@@ -34,11 +34,16 @@
 				class="bg-[#1DB954] text-black font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300"
 				on:click={async () => {
 					isLoading = true;
-					await generateImage();
-					isLoading = false;
+					try {
+						await generateImage();
+					} catch (error) {
+						console.error('Failed to generate image:', error);
+					} finally {
+						isLoading = false;
+					}
 				}}
 			>
-				{isLoading ? 'Loading...' : 'Generate Shareable Imagesss'}
+				{isLoading ? 'Loading...' : 'Generate Shareable Image'}
 			</button>
 			<div id="imageContainer" class="mt-8">
 				<!-- The generated image will be displayed here -->
