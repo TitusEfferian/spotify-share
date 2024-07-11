@@ -2,9 +2,9 @@
 	import { codeChallenge, codeVerifier } from '$lib/authHelper';
 	import { onMount } from 'svelte';
 
-	const getToken = async (code) => {
-		// stored in the previous step
-		let codeVerifier = localStorage.getItem('code_verifier');
+	// Function to get the access token using the authorization code
+	const getToken = async (code='') => {
+		const codeVerifier = localStorage.getItem('code_verifier');
 
 		const payload = {
 			method: 'POST',
@@ -16,37 +16,36 @@
 				grant_type: 'authorization_code',
 				code,
 				redirect_uri: 'http://localhost:5173',
-				code_verifier: codeVerifier
+				code_verifier: codeVerifier || '',
 			})
 		};
 
-		const body = await fetch('https://accounts.spotify.com/api/token', payload);
-		const response = await body.json();
+		const response = await fetch('https://accounts.spotify.com/api/token', payload);
+		const data = await response.json();
 
-		localStorage.setItem('access_token', response.access_token);
+		localStorage.setItem('access_token', data.access_token);
 	};
 
-	// Define the function to be called when the button is clicked
+	// Function to generate an image of the current song
 	async function generateImage() {
-		const authCode = localStorage.getItem('access_token');
+		const accessToken = localStorage.getItem('access_token');
 
-		if (authCode) {
-            const myHeaders = new Headers();
-		myHeaders.append(
-			'Authorization',
-			`Bearer ${localStorage.getItem('access_token')}`
-		);
+		if (accessToken) {
+			const headers = new Headers();
+			headers.append('Authorization', `Bearer ${accessToken}`);
 
-		const requestOptions = {
-			method: 'GET',
-			headers: myHeaders,
-			redirect: 'follow'
-		};
+			const requestOptions = {
+				method: 'GET',
+				headers: headers,
+			};
 
-		fetch('https://api.spotify.com/v1/me/player/currently-playing', requestOptions)
-			.then((response) => response.text())
-			.then((result) => console.log(result))
-			.catch((error) => console.error(error));
+			fetch('https://api.spotify.com/v1/me/player/currently-playing', requestOptions)
+				.then((response) => response.json())
+				.then((result) => {
+					// Handle the result to generate the image
+					console.log(result);
+				})
+				.catch((error) => console.error('Error:', error));
 		} else {
 			const clientId = '562519f36b3a4666b04648f2dd5b2dd4';
 			const redirectUri = 'http://localhost:5173';
@@ -56,7 +55,6 @@
 
 			localStorage.setItem('code_verifier', codeVerifier);
 
-			// try to go to spotify api
 			const params = {
 				response_type: 'code',
 				client_id: clientId,
@@ -71,13 +69,13 @@
 		}
 	}
 
-	// Use onMount to run code when the component mounts
+	// Run code when the component mounts
 	onMount(async () => {
 		const urlParams = new URLSearchParams(window.location.search);
 		const code = urlParams.get('code');
 		if (code) {
 			localStorage.setItem('auth_code', code);
-            await getToken(code);
+			await getToken(code);
 		}
 	});
 </script>
