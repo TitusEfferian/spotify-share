@@ -36,7 +36,6 @@
 					isLoading = true;
 					try {
 						const base64 = await generateImage();
-						console.log(base64);
 					} catch (error) {
 						console.error('Failed to generate image:', error);
 					} finally {

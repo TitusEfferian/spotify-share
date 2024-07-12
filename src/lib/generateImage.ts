@@ -1,5 +1,7 @@
 // src/lib/imageService.js
 import { codeChallenge, codeVerifier } from '$lib/authHelper';
+import Vibrant from 'node-vibrant';
+import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
 
 export async function generateImage() {
@@ -34,6 +36,93 @@ export async function generateImage() {
 				const imageResponse = await fetch(imageUrl);
 				const blob = await imageResponse.blob();
 				const base64Image = await convertBlobToBase64(blob);
+
+				const canvas = document.createElement('canvas');
+				const context = canvas.getContext('2d');
+
+				const img = new Image();
+				img.src = base64Image;
+
+				img.onload = async () => {
+					const width = 1600;
+					const height = 900;
+					const borderRadius = 80; // Adjust the border radius as needed
+					canvas.width = width;
+					canvas.height = height;
+					if (!context) {
+						return;
+					}
+					context.fillStyle = 'black';
+
+					// Calculate the position to center the image but move it to the left
+					const imgX = (canvas.width - img.width) / 2 - 100; // Move 100px to the left
+					const imgY = (canvas.height - img.height) / 2;
+
+					// Extract the two most prominent colors from the image using Vibrant
+					const vibrant = new Vibrant(img);
+					const palette = await vibrant.getPalette();
+
+					const colors = [
+						palette.Vibrant?.getHex() || '#000000',
+						palette.Muted?.getHex() || '#000000'
+					];
+
+					// Create a linear gradient from the two colors
+					const gradient = context.createLinearGradient(0, 0, width, height);
+					gradient.addColorStop(0, colors[0]);
+					gradient.addColorStop(1, colors[1]);
+					context.fillStyle = gradient;
+					context.fillRect(0, 0, width, height);
+
+					// Apply the border radius clip path
+					applyBorderRadiusClip(context, imgX, imgY, img.width, img.height, borderRadius);
+
+					// Draw the image
+					context.drawImage(img, imgX, imgY);
+
+					// Restore the context to remove the clipping
+					context.restore();
+					// Restore the context to remove the clipping
+					context.restore();
+
+					// Draw the text with different font sizes and weights
+					const textX = imgX + img.width + 50; // Position to the right of the image
+					const lineHeight = 40; // Line height for the text
+					const textHeight = lineHeight * 3; // Total height for three lines of text
+					const textY = (canvas.height - textHeight) / 2 + lineHeight; // Center the text vertically
+
+					// First line with a larger font size and bold weight
+					context.font = 'bold 40px Arial'; // Larger font size and bold weight for the first line
+					context.fillStyle = 'white';
+					context.textAlign = 'left';
+					context.fillText(result.item?.name || '', textX, textY);
+
+					// Second line with default font size and normal weight
+					context.font = '24px Arial'; // Default font size and normal weight
+					context.fillText(result.item?.artists?.[0].name || '', textX, textY + 1 * lineHeight);
+
+					// Third line with default font size and normal weight
+					context.font = '24px Arial'; // Default font size and normal weight
+					context.fillText('Listen on Spotify', textX, textY + 2 * lineHeight);
+
+					// Convert the canvas to a Blob
+					canvas.toBlob(async (blob) => {
+						if (blob) {
+							try {
+								await navigator.clipboard.write([
+									new ClipboardItem({
+										'image/png': blob
+									})
+								]);
+								alert('Image copied to clipboard!');
+							} catch (error) {
+								console.error('Failed to copy image: ', error);
+								alert('Failed to copy image to clipboard.');
+							}
+						}
+					}, 'image/png');
+				};
+
 				return base64Image;
 			} else {
 				throw new Error('No image found in the current track');
