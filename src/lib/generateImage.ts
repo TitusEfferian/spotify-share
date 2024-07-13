@@ -44,6 +44,8 @@ export async function generateImage() {
 
 			const result: CurrentTrack = await response.json();
 			const imageUrl = result.item?.album?.images?.[0]?.url || '';
+			const songName = result.item?.name || 'Unknown Song';
+			const artistName = result.item?.artists?.[0]?.name || 'Unknown Artist';
 
 			if (imageUrl) {
 				const imageResponse = await fetch(imageUrl);
@@ -107,28 +109,27 @@ export async function generateImage() {
 					context.font = 'bold 40px Arial'; // Larger font size and bold weight for the first line
 					context.fillStyle = 'white';
 					context.textAlign = 'left';
-					const truncatedName = truncateText(context, result.item?.name || '', maxWidth);
+					const truncatedName = truncateText(context, songName, maxWidth);
 					context.fillText(truncatedName, textX, textY);
 
 					// Second line with default font size and normal weight
 					context.font = '24px Arial'; // Default font size and normal weight
-					const truncatedArtist = truncateText(
-						context,
-						result.item?.artists?.[0].name || '',
-						maxWidth
-					);
+					const truncatedArtist = truncateText(context, artistName, maxWidth);
 					context.fillText(truncatedArtist, textX, textY + 1 * lineHeight);
 
 					// Third line with default font size and normal weight
 					context.font = '24px Arial'; // Default font size and normal weight
 					context.fillText('Listen on Spotify', textX, textY + 2 * lineHeight);
 
+					// Construct the file name
+					const fileName = `${songName}-${artistName}.png`;
+
 					// Convert the canvas to a Blob
 					canvas.toBlob((blob) => {
 						if (blob) {
 							const link = document.createElement('a');
 							link.href = URL.createObjectURL(blob);
-							link.download = 'spotify_image.png';
+							link.download = fileName;
 							link.click();
 
 							// Clean up the URL object after download
