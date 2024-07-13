@@ -12,6 +12,7 @@
 		if (code) {
 			localStorage.setItem('auth_code', code);
 			await getToken(code);
+			window.history.replaceState({}, document.title, window.location.pathname);
 		}
 	});
 </script>

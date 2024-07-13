@@ -52,8 +52,8 @@ export async function generateImage() {
 					}
 					context.fillStyle = 'black';
 
-					// Calculate the position to center the image but move it to the left
-					const imgX = (canvas.width - img.width) / 2 - 100; // Move 100px to the left
+					// Calculate the position to center the image but move it slightly to the left
+					const imgX = (canvas.width - img.width) / 2 - 400; // Move 50px to the left
 					const imgY = (canvas.height - img.height) / 2;
 
 					// Extract the two most prominent colors from the image using Vibrant
