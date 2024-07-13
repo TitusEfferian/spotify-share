@@ -3,6 +3,7 @@ import { codeChallenge, codeVerifier } from '$lib/authHelper';
 import Vibrant from 'node-vibrant';
 import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
+import { CLIENT_ID, CURRENT_PLAYING, REDIRECT_URI } from './constant';
 
 export async function generateImage() {
 	const authCode = localStorage.getItem('access_token');
@@ -18,10 +19,7 @@ export async function generateImage() {
 		};
 
 		try {
-			const response = await fetch(
-				'https://api.spotify.com/v1/me/player/currently-playing',
-				requestOptions
-			);
+			const response = await fetch(CURRENT_PLAYING, requestOptions);
 
 			if (response.status === 401) {
 				// Access token expired, re-authenticate
@@ -136,8 +134,8 @@ export async function generateImage() {
 }
 
 function reAuthenticate() {
-	const clientId = '562519f36b3a4666b04648f2dd5b2dd4';
-	const redirectUri = 'http://localhost:5173';
+	const clientId = CLIENT_ID;
+	const redirectUri = REDIRECT_URI;
 
 	const scope = 'user-read-private user-read-email user-read-playback-state';
 	const authUrl = new URL('https://accounts.spotify.com/authorize');

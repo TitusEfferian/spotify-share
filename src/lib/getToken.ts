@@ -1,3 +1,5 @@
+import { CLIENT_ID, REDIRECT_URI } from './constant';
+
 // src/lib/authService.js
 const getToken = async (code = '') => {
 	const codeVerifier = localStorage.getItem('code_verifier');
@@ -8,10 +10,10 @@ const getToken = async (code = '') => {
 			'Content-Type': 'application/x-www-form-urlencoded'
 		},
 		body: new URLSearchParams({
-			client_id: '562519f36b3a4666b04648f2dd5b2dd4',
+			client_id: CLIENT_ID,
 			grant_type: 'authorization_code',
 			code,
-			redirect_uri: 'http://localhost:5173',
+			redirect_uri: REDIRECT_URI,
 			code_verifier: codeVerifier || '' // Handle null value
 		})
 	};
