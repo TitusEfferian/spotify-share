@@ -1,5 +1,5 @@
 // src/lib/imageService.js
-import { codeChallenge, codeVerifier } from '$lib/authHelper';
+import { codeChallenge, codeVerifier, generateCodeChallenge } from '$lib/authHelper';
 import Vibrant from 'node-vibrant';
 import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
@@ -24,7 +24,7 @@ export async function generateImage() {
 
 			if (response.status === 401) {
 				// Access token expired, re-authenticate
-				reAuthenticate();
+				await reAuthenticate();
 				return;
 			}
 
@@ -132,11 +132,11 @@ export async function generateImage() {
 			console.error('Failed to generate image:', error);
 		}
 	} else {
-		reAuthenticate();
+		await reAuthenticate();
 	}
 }
 
-function reAuthenticate() {
+async function reAuthenticate() {
 	const clientId = CLIENT_ID;
 	const redirectUri = REDIRECT_URI;
 
@@ -144,7 +144,7 @@ function reAuthenticate() {
 	const authUrl = new URL('https://accounts.spotify.com/authorize');
 
 	localStorage.setItem('code_verifier', codeVerifier);
-
+	const codeChallenge = await generateCodeChallenge();
 	// Try to go to Spotify API
 	const params = {
 		response_type: 'code',
