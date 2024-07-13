@@ -5,6 +5,21 @@ import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
 import { CLIENT_ID, CURRENT_PLAYING, REDIRECT_URI } from './constant';
 
+// Function to truncate text and add ellipsis if necessary
+function truncateText(context, text, maxWidth) {
+	let width = context.measureText(text).width;
+	const ellipsis = '...';
+	const ellipsisWidth = context.measureText(ellipsis).width;
+	if (width <= maxWidth) {
+		return text;
+	}
+	while (width >= maxWidth - ellipsisWidth) {
+		text = text.slice(0, -1);
+		width = context.measureText(text).width;
+	}
+	return text + ellipsis;
+}
+
 export async function generateImage() {
 	const authCode = localStorage.getItem('access_token');
 
@@ -53,7 +68,7 @@ export async function generateImage() {
 					context.fillStyle = 'black';
 
 					// Calculate the position to center the image but move it slightly to the left
-					const imgX = (canvas.width - img.width) / 2 - 400; // Move 50px to the left
+					const imgX = (canvas.width - img.width) / 2 - 400; // Move 400px to the left
 					const imgY = (canvas.height - img.height) / 2;
 
 					// Extract the two most prominent colors from the image using Vibrant
@@ -80,43 +95,44 @@ export async function generateImage() {
 
 					// Restore the context to remove the clipping
 					context.restore();
-					// Restore the context to remove the clipping
-					context.restore();
 
 					// Draw the text with different font sizes and weights
 					const textX = imgX + img.width + 50; // Position to the right of the image
 					const lineHeight = 40; // Line height for the text
 					const textHeight = lineHeight * 3; // Total height for three lines of text
 					const textY = (canvas.height - textHeight) / 2 + lineHeight; // Center the text vertically
+					const maxWidth = 800; // Maximum width for the text
 
 					// First line with a larger font size and bold weight
 					context.font = 'bold 40px Arial'; // Larger font size and bold weight for the first line
 					context.fillStyle = 'white';
 					context.textAlign = 'left';
-					context.fillText(result.item?.name || '', textX, textY);
+					const truncatedName = truncateText(context, result.item?.name || '', maxWidth);
+					context.fillText(truncatedName, textX, textY);
 
 					// Second line with default font size and normal weight
 					context.font = '24px Arial'; // Default font size and normal weight
-					context.fillText(result.item?.artists?.[0].name || '', textX, textY + 1 * lineHeight);
+					const truncatedArtist = truncateText(
+						context,
+						result.item?.artists?.[0].name || '',
+						maxWidth
+					);
+					context.fillText(truncatedArtist, textX, textY + 1 * lineHeight);
 
 					// Third line with default font size and normal weight
 					context.font = '24px Arial'; // Default font size and normal weight
 					context.fillText('Listen on Spotify', textX, textY + 2 * lineHeight);
 
 					// Convert the canvas to a Blob
-					canvas.toBlob(async (blob) => {
+					canvas.toBlob((blob) => {
 						if (blob) {
-							try {
-								await navigator.clipboard.write([
-									new ClipboardItem({
-										'image/png': blob
-									})
-								]);
-								alert('Image copied to clipboard!');
-							} catch (error) {
-								console.error('Failed to copy image: ', error);
-								alert('Failed to copy image to clipboard.');
-							}
+							const link = document.createElement('a');
+							link.href = URL.createObjectURL(blob);
+							link.download = 'spotify_image.png';
+							link.click();
+
+							// Clean up the URL object after download
+							URL.revokeObjectURL(link.href);
 						}
 					}, 'image/png');
 				};
