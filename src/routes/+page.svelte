@@ -14,7 +14,6 @@
 			await getToken(code);
 		}
 	});
-	console.log(isLoading);
 </script>
 
 <div
@@ -35,7 +34,7 @@
 				on:click={async () => {
 					isLoading = true;
 					try {
-						const base64 = await generateImage();
+						await generateImage();
 					} catch (error) {
 						console.error('Failed to generate image:', error);
 					} finally {
