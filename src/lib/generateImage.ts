@@ -4,21 +4,7 @@ import Vibrant from 'node-vibrant';
 import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
 import { CLIENT_ID, CURRENT_PLAYING, REDIRECT_URI } from './constant';
-
-// Function to truncate text and add ellipsis if necessary
-function truncateText(context, text, maxWidth) {
-	let width = context.measureText(text).width;
-	const ellipsis = '...';
-	const ellipsisWidth = context.measureText(ellipsis).width;
-	if (width <= maxWidth) {
-		return text;
-	}
-	while (width >= maxWidth - ellipsisWidth) {
-		text = text.slice(0, -1);
-		width = context.measureText(text).width;
-	}
-	return text + ellipsis;
-}
+import truncateText from './truncateText';
 
 export async function generateImage() {
 	const authCode = localStorage.getItem('access_token');
