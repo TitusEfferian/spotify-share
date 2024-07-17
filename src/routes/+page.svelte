@@ -17,6 +17,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Spotify Shareable Song Image Generator</title>
+</svelte:head>
+
 <div
 	class="bg-gradient-to-br from-[#1DB954] to-[#191414] min-h-screen flex flex-col items-center justify-center relative"
 >
