@@ -1,5 +1,5 @@
 // src/lib/imageService.js
-import { codeChallenge, codeVerifier, generateCodeChallenge } from '$lib/authHelper';
+import { codeVerifier, generateCodeChallenge } from '$lib/authHelper';
 import Vibrant from 'node-vibrant';
 import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
