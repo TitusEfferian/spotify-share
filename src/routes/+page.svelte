@@ -19,6 +19,10 @@
 
 <svelte:head>
 	<title>Spotify Shareable Song Image Generator</title>
+	<meta
+		name="description"
+		content="Easily create and share Spotify-style song images directly from the web. Generate beautiful, shareable visuals of your favorite songs just like Spotify's native app."
+	/>
 </svelte:head>
 
 <div
