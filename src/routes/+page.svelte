@@ -2,8 +2,11 @@
 	import { generateImage } from '$lib/generateImage';
 	import getToken from '$lib/getToken';
 	import { onMount } from 'svelte';
+	import Modal from './modal.svelte';
 
 	let isLoading = false;
+	let showModal = false;
+	let modalMessage = '';
 
 	// Run code when the component mounts
 	onMount(async () => {
@@ -16,15 +19,27 @@
 		}
 	});
 
+	function openModal(message = '') {
+		showModal = true;
+		modalMessage = message;
+	}
+
 	async function handleGenerateImage() {
 		isLoading = true;
 		try {
-			await generateImage();
+			const resp = await generateImage();
+			if (resp === 204) {
+				openModal('no current track listened');
+			}
 		} catch (error) {
 			console.error('Failed to generate image:', error);
 		} finally {
 			isLoading = false;
 		}
+	}
+
+	function closeModal() {
+		showModal = false;
 	}
 </script>
 
@@ -70,4 +85,7 @@
 			class="underline text-white font-bold">@titusefferian</a
 		>,<br />assisted by ChatGPT-4o
 	</footer>
+
+	<!-- Modal Component -->
+	<Modal show={showModal} {closeModal} {modalMessage} />
 </div>

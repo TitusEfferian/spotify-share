@@ -20,6 +20,9 @@ export async function generateImage() {
 
 		try {
 			const response = await fetch(CURRENT_PLAYING, requestOptions);
+			if (response.status === 204) {
+				return 204;
+			}
 
 			if (response.status === 401) {
 				// Access token expired, re-authenticate
