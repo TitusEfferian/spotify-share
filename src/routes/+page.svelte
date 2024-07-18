@@ -15,6 +15,17 @@
 			window.history.replaceState({}, document.title, window.location.pathname);
 		}
 	});
+
+	async function handleGenerateImage() {
+		isLoading = true;
+		try {
+			await generateImage();
+		} catch (error) {
+			console.error('Failed to generate image:', error);
+		} finally {
+			isLoading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -36,22 +47,16 @@
 			<p class="text-white text-lg mb-8">
 				Click the button below to generate a shareable image of your current song.
 			</p>
-			<!-- Bind the generateImage function to the button's click event -->
 			<button
 				id="generateButton"
 				class="bg-[#1DB954] text-black font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300"
-				on:click={async () => {
-					isLoading = true;
-					try {
-						await generateImage();
-					} catch (error) {
-						console.error('Failed to generate image:', error);
-					} finally {
-						isLoading = false;
-					}
-				}}
+				on:click={handleGenerateImage}
 			>
-				{isLoading ? 'Loading...' : 'Generate Shareable Image'}
+				{#if isLoading}
+					Loading...
+				{:else}
+					Generate Shareable Image
+				{/if}
 			</button>
 			<div id="imageContainer" class="mt-8">
 				<!-- The generated image will be displayed here -->
@@ -59,6 +64,10 @@
 		</div>
 	</div>
 	<footer class="absolute bottom-2 text-sm text-white text-center">
-		built with love by @titusefferian,<br />assisted by ChatGPT-4o
+		built with love by <a
+			href="https://github.com/titusefferian"
+			target="_blank"
+			class="underline text-white font-bold">@titusefferian</a
+		>,<br />assisted by ChatGPT-4o
 	</footer>
 </div>
