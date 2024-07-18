@@ -1,10 +1,9 @@
-// src/lib/imageService.js
 import { codeVerifier, generateCodeChallenge } from '$lib/authHelper';
-import Vibrant from 'node-vibrant';
 import applyBorderRadiusClip from './applyBorderRadiusClip';
 import type { CurrentTrack } from './SpotifyTypes';
 import { CLIENT_ID, CURRENT_PLAYING, REDIRECT_URI } from './constant';
 import truncateText from './truncateText';
+import { getImageData, kMeansDominantColors } from './Kmeans';
 
 export async function generateImage() {
 	const authCode = localStorage.getItem('access_token');
@@ -60,14 +59,10 @@ export async function generateImage() {
 					const imgX = (canvas.width - img.width) / 2 - 400; // Move 400px to the left
 					const imgY = (canvas.height - img.height) / 2;
 
-					// Extract the two most prominent colors from the image using Vibrant
-					const vibrant = new Vibrant(img);
-					const palette = await vibrant.getPalette();
-
-					const colors = [
-						palette.Vibrant?.getHex() || '#000000',
-						palette.Muted?.getHex() || '#000000'
-					];
+					// Extract the two most prominent colors from the image using K-means clustering
+					context.drawImage(img, imgX, imgY);
+					const imageData = getImageData(context, imgX, imgY, img.width, img.height);
+					const colors = kMeansDominantColors(imageData, 2);
 
 					// Create a linear gradient from the two colors
 					const gradient = context.createLinearGradient(0, 0, width, height);
